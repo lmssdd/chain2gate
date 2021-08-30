@@ -29,8 +29,12 @@ def trim_dict(d):
     emax = max(d['epoch'])
     emin = min([e for e in d['epoch'] if e > emax - 60*60*24])
     imin = d['epoch'].index(emin)
-    print(d['epoch'][imin:])
-    print(d['energy'][imin:])
+    d['epoch'] = d['epoch'][imin:]
+    d['meter'] = d['meter'][imin:]
+    d['type'] = d['type'][imin:]
+    d['tariff'] = d['tariff'][imin:]
+    d['energy'] = d['energy'][imin:]
+    d['power'] = d['power'][imin:]
 
 def load_json():
     try:
@@ -69,9 +73,7 @@ async def chain2client():
             async with websockets.connect(uri) as websocket:
                 async for message in websocket:
                     msg = json.loads(message)
-
-                    #print(msg)
-
+                    
                     if 'Chain2Data' in msg:
                         msg_meter = msg['Chain2Data']['Meter']
                         msg_type = msg['Chain2Data']['Type']
@@ -98,18 +100,15 @@ async def chain2client():
                         d['energy'].append(msg_energy)
                         d['power'].append(msg_power)
                         
-                        #if msg_type == 'CF1':
-                        #    trim_dict(d)
-                        
                         now = datetime.datetime.now()
                         print(f'{now} {msg_type} ')
                         
-                        save_json(d)
-
-                        if last_upload.date() < now.date():
-                            upload(now.strftime("%Y%m%d"))
-                        if last_upload < now - datetime.timedelta(minutes=1):
+                        if msg_type == 'CF1':
+                            trim_dict(d)
+                            save_json(d)
                             upload()
+                            if last_upload.date() < now.date():
+                                upload(now.strftime("%Y%m%d"))
                             last_upload = now
 
                         if msg_type == 'CF1':
@@ -119,9 +118,6 @@ async def chain2client():
                         if msg_type == 'CF21':
                             c = f"curl -i -XPOST 'http://localhost:8086/write?db=chain2gate' --data-binary '{msg_meter} power={msg_power} {msg_epoch}000000000'"
                             os.system(c)
-                    
-                    #if 'Chain2Info' in msg:
-                    #    print("info")
 
         except:
             print('Socket error - retrying connection in 10 sec (Ctrl-C to quit)')
