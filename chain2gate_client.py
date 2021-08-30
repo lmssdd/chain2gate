@@ -14,7 +14,7 @@ ApiKey = 'API_KEY'
 
 def configure():
     global DeviceId, RootDir, ServerIP, ApiKey
-    
+
     file = Path('settings.json').absolute()
     if not file.exists():
         print(f"WARNING: {file} file not found, you cannot continue, please run setup")
@@ -71,60 +71,60 @@ async def chain2client():
         d = load_json()
         last_upload = datetime.datetime.now()
 
-        #try:
-        async with websockets.connect(uri) as websocket:
-            async for message in websocket:
-                msg = json.loads(message)
-                
-                if 'Chain2Data' in msg:
-                    msg_meter = msg['Chain2Data']['Meter']
-                    msg_type = msg['Chain2Data']['Type']
-                    msg_payload = msg['Chain2Data']['Payload']
-                    
-                    msg_epoch = None
-                    msg_tariff = None
-                    msg_energy = None
-                    msg_power = None
+        try:
+            async with websockets.connect(uri) as websocket:
+                async for message in websocket:
+                    msg = json.loads(message)
+                    print(msg)
+                    if 'Chain2Data' in msg:
+                        msg_meter = msg['Chain2Data']['Meter']
+                        msg_type = msg['Chain2Data']['Type']
+                        msg_payload = msg['Chain2Data']['Payload']
+                        
+                        msg_epoch = None
+                        msg_tariff = None
+                        msg_energy = None
+                        msg_power = None
 
-                    if msg_type == 'CF1':
-                        msg_epoch = msg_payload['MeasurePosixTimestamp']
-                        msg_tariff = msg_payload['TariffCode']
-                        msg_energy = msg_payload['TotalActEnergy']
+                        if msg_type == 'CF1':
+                            msg_epoch = msg_payload['MeasurePosixTimestamp']
+                            msg_tariff = msg_payload['TariffCode']
+                            msg_energy = msg_payload['TotalActEnergy']
 
-                    if msg_type == 'CF21':
-                        msg_epoch = msg_payload['EventPosixTimestamp']
-                        msg_power = msg_payload['InstantPower']
+                        if msg_type == 'CF21':
+                            msg_epoch = msg_payload['EventPosixTimestamp']
+                            msg_power = msg_payload['InstantPower']
 
-                    d['epoch'].append(msg_epoch)
-                    d['meter'].append(msg_meter)
-                    d['type'].append(msg_type)
-                    d['tariff'].append(msg_tariff)
-                    d['energy'].append(msg_energy)
-                    d['power'].append(msg_power)
-                    
-                    now = datetime.datetime.now()
-                    print(f'{now} {msg_type} ')
-                    
-                    if msg_type == 'CF1':
-                        trim_dict(d)
-                        save_json(d)
-                        upload()
-                        if last_upload.date() < now.date():
-                            upload(now.strftime("%Y%m%d"))
-                        last_upload = now
+                        d['epoch'].append(msg_epoch)
+                        d['meter'].append(msg_meter)
+                        d['type'].append(msg_type)
+                        d['tariff'].append(msg_tariff)
+                        d['energy'].append(msg_energy)
+                        d['power'].append(msg_power)
+                        
+                        now = datetime.datetime.now()
+                        print(f'{now} {msg_type} ')
+                        
+                        if msg_type == 'CF1':
+                            trim_dict(d)
+                            save_json(d)
+                            upload()
+                            if last_upload.date() < now.date():
+                                upload(now.strftime("%Y%m%d"))
+                            last_upload = now
 
-                    if msg_type == 'CF1':
-                        c = f"curl -i -XPOST 'http://localhost:8086/write?db=chain2gate' --data-binary '{msg_meter} energy={msg_energy} {msg_epoch}000000000'"
-                        os.system(c)
-                    
-                    if msg_type == 'CF21':
-                        c = f"curl -i -XPOST 'http://localhost:8086/write?db=chain2gate' --data-binary '{msg_meter} power={msg_power} {msg_epoch}000000000'"
-                        os.system(c)
+                        if msg_type == 'CF1':
+                            c = f"curl -i -XPOST 'http://localhost:8086/write?db=chain2gate' --data-binary '{msg_meter} energy={msg_energy} {msg_epoch}000000000'"
+                            os.system(c)
+                        
+                        if msg_type == 'CF21':
+                            c = f"curl -i -XPOST 'http://localhost:8086/write?db=chain2gate' --data-binary '{msg_meter} power={msg_power} {msg_epoch}000000000'"
+                            os.system(c)
 
-        #except:
-        #    print('Socket error - retrying connection in 10 sec (Ctrl-C to quit)')
-        #    await asyncio.sleep(10)
-        #    continue
+        except:
+            print('Socket error - retrying connection in 10 sec (Ctrl-C to quit)')
+            await asyncio.sleep(10)
+            continue
 
 if __name__ == '__main__':
     configure()
