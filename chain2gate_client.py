@@ -13,6 +13,8 @@ ServerIP = 'XXX.XXX.XXX.XXX'
 ApiKey = 'API_KEY'
 
 def configure():
+    global DeviceId, RootDir, ServerIP, ApiKey
+    
     file = Path('settings.json').absolute()
     if not file.exists():
         print(f"WARNING: {file} file not found, you cannot continue, please run setup")
