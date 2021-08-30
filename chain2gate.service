@@ -1,0 +1,9 @@
+[Unit]
+Description=Chain2gate
+
+[Service]
+ExecStart=python3 /home/pi/chain2gate/chain2gate_client.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
