@@ -57,9 +57,9 @@ def save_json(d):
         json.dump(d, jsonfile)
 
 def upload(date=None):
-    c = f'curl -X PUT "http://{ServerIP}/api/chain2gate/{DeviceId}?api_key={ApiKey}" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@{RootDir}/{DeviceId}.json;type=text/plain" >/dev/null'
+    c = f'curl -X PUT "http://{ServerIP}/api/chain2gate/{DeviceId}?api_key={ApiKey}" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@{RootDir}/{DeviceId}.json;type=text/plain" > /dev/null 2>&1'
     if date is not None:
-        c = f'curl -X PUT "http://{ServerIP}/api/chain2gate/{DeviceId}?api_key={ApiKey}&date={date}" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@{RootDir}/{DeviceId}.json;type=text/plain" >/dev/null'
+        c = f'curl -X PUT "http://{ServerIP}/api/chain2gate/{DeviceId}?api_key={ApiKey}&date={date}" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@{RootDir}/{DeviceId}.json;type=text/plain" > /dev/null 2>&1'
     os.system(c)
 
 async def chain2client():
