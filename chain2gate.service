@@ -2,7 +2,7 @@
 Description=Chain2gate
 
 [Service]
-ExecStart=/home/pi/chain2gate/chain2gate_client.py
+ExecStart=python3 /home/pi/chain2gate/chain2gate_client.py
 Restart=always
 
 [Install]
