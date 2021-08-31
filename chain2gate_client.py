@@ -105,8 +105,8 @@ async def chain2client():
                         now = datetime.datetime.now()
                         print(f'{now} {msg_type} ')
                         
+                        trim_dict(d)
                         if msg_type == 'CF1':
-                            trim_dict(d)
                             save_json(d)
                             upload()
                             if last_upload.date() < now.date():
