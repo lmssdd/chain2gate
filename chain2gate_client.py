@@ -14,18 +14,16 @@ ApiKey = 'API_KEY'
 
 def configure():
     global DeviceId, RootDir, ServerIP, ApiKey
-
-    file = Path(f'{RootDir}/settings.json').absolute()
-    if not file.exists():
-        print(f"WARNING: {file} file not found, you cannot continue, please run setup")
+    try:
+        with open(f"{RootDir}/settings.json", 'r') as jsonfile:
+            settings = json.load(jsonfile)
+            DeviceId = settings.get('DeviceId')
+            RootDir = settings.get('RootDir')
+            ServerIP = settings.get('ServerIP')
+            ApiKey = settings.get('ApiKey')
+    except:
+        print("WARNING: settings.json file not found, you cannot continue, please run setup")
         raise Exception("settings.json file not found, you cannot continue, please run setup")
-
-    with open(file) as fin:
-        settings = json.load(fin)
-        DeviceId = settings.get('DeviceId')
-        RootDir = settings.get('RootDir')
-        ServerIP = settings.get('ServerIP')
-        ApiKey = settings.get('ApiKey')
 
 def trim_dict(d):
     emax = max(d['epoch'])
