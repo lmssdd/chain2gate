@@ -7,8 +7,8 @@ from pathlib import Path
 import datetime
 import os
 
+RootDir = '/home/pi/chain2gate'
 DeviceId = 'c2g-XXXXXXXXX'
-RootDir = '.'
 ServerIP = 'XXX.XXX.XXX.XXX'
 ApiKey = 'API_KEY'
 
@@ -17,7 +17,6 @@ def configure():
     with open(f"{RootDir}/settings.json", 'r') as jsonfile:
         settings = json.load(jsonfile)
         DeviceId = settings.get('DeviceId')
-        RootDir = settings.get('RootDir')
         ServerIP = settings.get('ServerIP')
         ApiKey = settings.get('ApiKey')
 
