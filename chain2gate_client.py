@@ -29,9 +29,9 @@ def configure():
 
 def trim_dict(d):
     print(d['epoch'])
-    emax = max(d['epoch'])
-    emin = min([e for e in d['epoch'] if e > emax - 60*60*24])
-    imin = d['epoch'].index(emin)
+    emax = max(int(d['epoch']))
+    emin = min([e for e in int(d['epoch']) if e > emax - 60*60*24])
+    imin = int(d['epoch']).index(emin)
     print(emax, emin, imin)
     d['epoch'] = d['epoch'][imin:]
     print(d['epoch'])
