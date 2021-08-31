@@ -109,11 +109,11 @@ async def chain2client():
                             last_upload = now
 
                         if msg_type == 'CF1':
-                            c = f"curl -i -XPOST 'http://localhost:8086/write?db=chain2gate' --data-binary '{msg_meter} energy={msg_energy} {msg_epoch}000000000'"
+                            c = f"curl -i -XPOST 'http://localhost:8086/write?db=chain2gate' --data-binary '{msg_meter} energy={msg_energy} {msg_epoch}000000000' >/dev/null"
                             os.system(c)
                         
                         if msg_type == 'CF21':
-                            c = f"curl -i -XPOST 'http://localhost:8086/write?db=chain2gate' --data-binary '{msg_meter} power={msg_power} {msg_epoch}000000000'"
+                            c = f"curl -i -XPOST 'http://localhost:8086/write?db=chain2gate' --data-binary '{msg_meter} power={msg_power} {msg_epoch}000000000' >/dev/null"
                             os.system(c)
 
         except:
