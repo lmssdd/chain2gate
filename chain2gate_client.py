@@ -57,9 +57,9 @@ def save_json(d):
         json.dump(d, jsonfile)
 
 def upload(date=None):
-    c = f'curl -X PUT "http://{ServerIP}/api/chain2gate/{DeviceId}?api_key={ApiKey}" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@{RootDir}/{DeviceId}.json;type=text/plain"'
+    c = f'curl -X PUT "http://{ServerIP}/api/chain2gate/{DeviceId}?api_key={ApiKey}" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@{RootDir}/{DeviceId}.json;type=text/plain" >/dev/null'
     if date is not None:
-        c = f'curl -X PUT "http://{ServerIP}/api/chain2gate/{DeviceId}?api_key={ApiKey}&date={date}" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@{RootDir}/{DeviceId}.json;type=text/plain"'
+        c = f'curl -X PUT "http://{ServerIP}/api/chain2gate/{DeviceId}?api_key={ApiKey}&date={date}" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@{RootDir}/{DeviceId}.json;type=text/plain" >/dev/null'
     os.system(c)
 
 async def chain2client():
@@ -73,10 +73,11 @@ async def chain2client():
             async with websockets.connect(uri) as websocket:
                 async for message in websocket:
                     msg = json.loads(message)
-                    print(msg)
                     now = datetime.datetime.now()
 
                     if 'Chain2Data' in msg:
+                        print(msg)
+
                         msg_meter = msg['Chain2Data']['Meter']
                         msg_type = msg['Chain2Data']['Type']
                         msg_payload = msg['Chain2Data']['Payload']
@@ -104,8 +105,10 @@ async def chain2client():
                             trim_dict(d)
                             save_json(d)
                             upload()
+                            print('Uploaded')
                             if last_upload.date() < now.date():
                                 upload(now.strftime("%Y%m%d"))
+                                print(f'Uploaded {now.strftime("%Y%m%d")}')
                             last_upload = now
 
                         if msg_type == 'CF1':
