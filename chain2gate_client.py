@@ -28,16 +28,12 @@ def configure():
         ApiKey = settings.get('ApiKey')
 
 def trim_dict(d):
-    print(d['epoch'])
-    emax = max(int(d['epoch']))
-    emin = min([e for e in int(d['epoch']) if e > emax - 60*60*24])
-    imin = int(d['epoch']).index(emin)
-    print(emax, emin, imin)
+    emax = max(d['epoch'])
+    emin = min([e for e in d['epoch'] if e > emax - 60*60*24])
+    imin = d['epoch'].index(emin)
     d['epoch'] = d['epoch'][imin:]
-    print(d['epoch'])
     d['meter'] = d['meter'][imin:]
     d['type'] = d['type'][imin:]
-    d['tariff'] = d['tariff'][imin:]
     d['energy'] = d['energy'][imin:]
     d['power'] = d['power'][imin:]
 
@@ -50,7 +46,6 @@ def load_json():
             'epoch': [],
             'meter': [],
             'type': [],
-            'tariff': [],
             'energy': [],
             'power': []
         }
@@ -79,36 +74,33 @@ async def chain2client():
                 async for message in websocket:
                     msg = json.loads(message)
                     print(msg)
+                    now = datetime.datetime.now()
+
                     if 'Chain2Data' in msg:
                         msg_meter = msg['Chain2Data']['Meter']
                         msg_type = msg['Chain2Data']['Type']
                         msg_payload = msg['Chain2Data']['Payload']
                         
                         msg_epoch = None
-                        msg_tariff = None
                         msg_energy = None
                         msg_power = None
 
                         if msg_type == 'CF1':
                             msg_epoch = msg_payload['MeasurePosixTimestamp']
-                            msg_tariff = msg_payload['TariffCode']
                             msg_energy = msg_payload['TotalActEnergy']
 
                         if msg_type == 'CF21':
                             msg_epoch = msg_payload['EventPosixTimestamp']
                             msg_power = msg_payload['InstantPower']
 
-                        d['epoch'].append(msg_epoch)
-                        d['meter'].append(msg_meter)
-                        d['type'].append(msg_type)
-                        d['tariff'].append(msg_tariff)
-                        d['energy'].append(msg_energy)
-                        d['power'].append(msg_power)
+                        if msg_type in ['CF1', 'CF21']:
+                            d['epoch'].append(msg_epoch)
+                            d['meter'].append(msg_meter)
+                            d['type'].append(msg_type)
+                            d['energy'].append(msg_energy)
+                            d['power'].append(msg_power)
+                            trim_dict(d)
                         
-                        now = datetime.datetime.now()
-                        print(f'{now} {msg_type} ')
-                        
-                        trim_dict(d)
                         if msg_type == 'CF1':
                             save_json(d)
                             upload()
