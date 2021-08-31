@@ -99,9 +99,9 @@ async def chain2client():
                             d['type'].append(msg_type)
                             d['energy'].append(msg_energy)
                             d['power'].append(msg_power)
-                            trim_dict(d)
                         
                         if msg_type == 'CF1':
+                            trim_dict(d)
                             save_json(d)
                             upload()
                             if last_upload.date() < now.date():
